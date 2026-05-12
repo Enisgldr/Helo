@@ -3,39 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Helom</title>
-    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet">
+    <title>Enis'in Gizli Dünyası Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Orbitron:wght@500&display=swap" rel="stylesheet">
     <style>
-        /* Kaydırmayı tamamen kapat */
         * { box-sizing: border-box; margin: 0; padding: 0; touch-action: none; }
         
         body {
             background: #d1d1d1;
             font-family: 'Permanent Marker', cursive;
-            /* lvh ve dvh mobil tarayıcı çubuklarını hesaba katar */
-            height: 100vh;
             height: 100dvh; 
             width: 100vw;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start; /* Sayfayı daha üste almak için */
+            padding-top: 2dvh; /* Üstten küçük bir boşluk */
             overflow: hidden;
-            position: fixed; /* Ekranın oynamasını engeller */
+            position: fixed;
+        }
+
+        /* Giriş Uyarı Yazısı */
+        #rotate-hint {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            text-align: center;
+            width: 80%;
+            font-family: 'Orbitron', sans-serif;
+            color: #2c3e50;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            pointer-events: none;
+            animation: fadeInOut 5s forwards; /* 5 saniye sürer ve biter */
+            text-shadow: 0 0 10px rgba(255,255,255,0.8);
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; filter: blur(10px); }
+            20% { opacity: 1; filter: blur(0px); }
+            80% { opacity: 1; filter: blur(0px); }
+            100% { opacity: 0; filter: blur(10px); visibility: hidden; }
         }
 
         #paper {
             position: relative;
-            /* Ekranın %96'sını kullan, taşma yapma */
             width: 96vw;
-            height: 94dvh;
+            height: 85dvh; /* Yüksekliği biraz azalttık ki üste daha iyi yerleşsin */
             background: #fff;
-            box-shadow: 0 0 40px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
             border: 1px solid #ccc;
             overflow: hidden;
-            border-radius: 8px;
+            border-radius: 12px;
         }
 
-        /* Çizgiler */
         #paper::before {
             content: '';
             position: absolute;
@@ -57,59 +80,58 @@
         }
 
         .sun-body {
-            width: 60px; /* Mobilde biraz küçülttük */
-            height: 60px;
+            width: 55px;
+            height: 55px;
             background: #ffce00;
             border-radius: 50%;
             box-shadow: 0 0 15px #ffce00;
             border: 2px solid #f39c12;
+            transition: 0.3s;
         }
 
         #sun-label {
             margin-top: 5px;
-            font-size: 16px;
+            font-size: 14px;
             color: #e67e22;
             opacity: 0;
-            white-space: nowrap;
+            background: rgba(255,255,255,0.8);
+            padding: 2px 5px;
+            border-radius: 5px;
         }
 
-        /* Gizli H (Sol Alt) */
+        /* Gizli H Harfi (Sol Alt) */
         #secret-mini-sun {
             position: absolute;
             bottom: 10px;
             left: 10px;
-            width: 20px;
-            height: 20px;
-            background: rgba(255,255,255,0.1); /* Başta neredeyse görünmez */
+            width: 25px;
+            height: 25px;
+            background: rgba(0,0,0,0.02);
             border-radius: 50%;
             z-index: 200;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: 0.5s;
         }
 
         #secret-mini-sun.active {
             background: #ffeb3b;
-            width: 40px;
-            height: 40px;
-            box-shadow: 0 0 15px #ffeb3b;
+            width: 45px;
+            height: 45px;
+            box-shadow: 0 0 20px #ffeb3b;
         }
 
-        #secret-h {
-            color: #fff;
-            font-weight: 900;
-            display: none;
-        }
-
+        #secret-h { color: #fff; font-weight: 900; display: none; pointer-events: none; }
         #secret-mini-sun.active #secret-h { display: block; }
 
-        /* Araçlar - Mobilde daha rahat basılması için büyüttük */
+        /* Araç Çubuğu */
         .toolbar {
             position: absolute;
             bottom: 15px;
             right: 15px;
             display: flex;
-            gap: 8px;
+            gap: 10px;
             z-index: 100;
         }
 
@@ -119,6 +141,7 @@
             border-radius: 50%;
             border: 2px solid white;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            cursor: pointer;
         }
 
         #clear-btn {
@@ -129,33 +152,38 @@
             border: none;
             border-radius: 20px;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 11px;
+            cursor: pointer;
         }
 
-        canvas { position: absolute; top: 0; left: 0; z-index: 10; width: 100%; height: 100%; }
+        canvas { position: absolute; top: 0; left: 0; z-index: 10; cursor: crosshair; }
     </style>
 </head>
 <body>
 
-<div id="paper">
-    <canvas id="canvas"></canvas>
-
-    <div id="main-sun-container" onclick="toggleLabel()">
-        <div class="sun-body"></div>
-        <div id="sun-label">Enis'in güneşi</div>
+    <div id="rotate-hint">
+        Please rotate your phone<br>for a better experience
     </div>
 
-    <div id="secret-mini-sun" onclick="this.classList.toggle('active')">
-        <span id="secret-h">H</span>
-    </div>
+    <div id="paper">
+        <canvas id="canvas"></canvas>
 
-    <div class="toolbar">
-        <div class="color-circle" style="background: #2c3e50;" onclick="setColor('#2c3e50')"></div>
-        <div class="color-circle" style="background: #e74c3c;" onclick="setColor('#e74c3c')"></div>
-        <div class="color-circle" style="background: #3498db;" onclick="setColor('#3498db')"></div>
-        <button id="clear-btn" onclick="clearCanvas()">TEMİZLE</button>
+        <div id="main-sun-container" onclick="toggleLabel()">
+            <div class="sun-body"></div>
+            <div id="sun-label">Enis'in güneşi</div>
+        </div>
+
+        <div id="secret-mini-sun" onclick="this.classList.toggle('active')">
+            <span id="secret-h">H</span>
+        </div>
+
+        <div class="toolbar">
+            <div class="color-circle" style="background: #2c3e50;" onclick="setColor('#2c3e50')"></div>
+            <div class="color-circle" style="background: #e74c3c;" onclick="setColor('#e74c3c')"></div>
+            <div class="color-circle" style="background: #3498db;" onclick="setColor('#3498db')"></div>
+            <button id="clear-btn" onclick="clearCanvas()">CLEAR</button>
+        </div>
     </div>
-</div>
 
 <script>
     const canvas = document.getElementById('canvas');
@@ -167,9 +195,10 @@
     let currentColor = '#2c3e50';
 
     function init() {
-        // Canvas'ın gerçek piksel boyutunu ayarla
         canvas.width = paper.clientWidth;
         canvas.height = paper.clientHeight;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
     }
 
     window.addEventListener('resize', init);
@@ -181,10 +210,7 @@
         const rect = canvas.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        return {
-            x: clientX - rect.left,
-            y: clientY - rect.top
-        };
+        return { x: clientX - rect.left, y: clientY - rect.top };
     }
 
     function start(e) {
@@ -198,8 +224,6 @@
         if (!drawing) return;
         const pos = getPos(e);
         ctx.lineWidth = 4;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
         ctx.strokeStyle = currentColor;
         ctx.lineTo(pos.x, pos.y);
         ctx.stroke();
@@ -213,12 +237,9 @@
         label.style.opacity = "0";
     }
 
-    // Fare Olayları
     canvas.addEventListener('mousedown', start);
     canvas.addEventListener('mousemove', draw);
     window.addEventListener('mouseup', end);
-
-    // Dokunmatik Olaylar
     canvas.addEventListener('touchstart', (e) => { start(e); });
     canvas.addEventListener('touchmove', (e) => { draw(e); });
     canvas.addEventListener('touchend', end);
