@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Enis'in Gizli Dünyası Pro</title>
+    <title>Helom</title>
     <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Orbitron:wght@500&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; touch-action: none; }
@@ -218,6 +218,35 @@
         const pos = getPos(e);
         ctx.beginPath();
         ctx.moveTo(pos.x, pos.y);
+    }
+
+    function draw(e) {
+        if (!drawing) return;
+        const pos = getPos(e);
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = currentColor;
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+    }
+
+    function end() { drawing = false; }
+
+    function toggleLabel() { label.style.opacity = (label.style.opacity == "1") ? "0" : "1"; }
+    function clearCanvas() { 
+        ctx.clearRect(0, 0, canvas.width, canvas.height); 
+        label.style.opacity = "0";
+    }
+
+    canvas.addEventListener('mousedown', start);
+    canvas.addEventListener('mousemove', draw);
+    window.addEventListener('mouseup', end);
+    canvas.addEventListener('touchstart', (e) => { start(e); });
+    canvas.addEventListener('touchmove', (e) => { draw(e); });
+    canvas.addEventListener('touchend', end);
+</script>
+
+</body>
+</html>;
     }
 
     function draw(e) {
